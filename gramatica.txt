@@ -1,0 +1,53 @@
+Programa --> (Libreria)* BloquePrograma <EOF>
+
+Libreria --> <IMPORT> <PALABRA>
+Libreria -->  (Procedimiento)*
+
+BloquePrograma --> (Procedimiento)* (Instruccion)*
+
+Procedimiento --> <TO> <PALABRA> ListaParams BloquePrograma <END>
+
+ListaParams --> (<VARIABLE>)*
+
+Instruccion --> Mover | Comando | Bucles | LlamadaProcedimiento
+
+Mover --> <FD> Expresion
+	| <BK> Expresion
+	| <RT> Expresion
+	| <LT> Expresion
+	| <ARCR> Expresion Expresion
+	| <ARCL> Expresion Expresion
+	| <HOME>
+	| <SETXY> Expresion Expresion
+
+Comando --> <CS> | <PU> | <PD> | <HT> | <ST> | <STOP> | <MAKE> <CADENA> Expresion
+
+Bucles --> 
+	<FOR> <CORCHETEABI> <PALABRA> Expresion Expresion Expresion <CORCHETECER> Bloque
+	| <REPEAT> Expresion Bloque
+	| <IF> Condicion Bloque
+
+Bloque --> <CORCHETEABI> (Instruccion)* <CORCHETECER>
+
+LlamadaProcedimiento --> <PALABRA> (Expresion)*
+
+Condicion --> Expresion Operador Expresion
+
+Operador --> <MENORQUE>
+	| <MAYORQUE>
+	| <IGUAL>
+	| <MENORIGUAL>
+	| <MAYORIGUAL>
+	| <DISTINTO>
+
+Expresion --> Termino Ep
+Ep --> ((<MAS> | <MENOS>) Termino Ep)?
+
+Termino -->  Factor Tp
+Tp --> ((<PROD> | <DIV>) Factor  Tp)?
+
+Factor --> <NUMERO>
+	| <VARIABLE>
+	| <CADENA>
+	| <NATIVA> Expresion
+	| <PARABI> Expresion <PARCER>

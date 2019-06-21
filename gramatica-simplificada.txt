@@ -1,0 +1,41 @@
+Programa --> (Instruccion)* <EOF>
+
+Instruccion --> Mover | Comando | Bucles
+
+Mover --> <FD> Expresion
+	| <BK> Expresion
+	| <RT> Expresion
+	| <LT> Expresion
+	| <ARCR> Expresion Expresion
+	| <ARCL> Expresion Expresion
+	| <HOME>
+	| <SETXY> Expresion Expresion
+
+Comando --> <CS> | <PU> | <PD> | <HT> | <ST> | <STOP> | <MAKE> <CADENA> Expresion
+
+Bucles --> 
+	<FOR> <CORCHETEABI> <PALABRA> Expresion Expresion Expresion <CORCHETECER> Bloque
+	| <REPEAT> Expresion Bloque
+	| <IF> Condicion Bloque
+
+Bloque --> <CORCHETEABI> (Instruccion)* <CORCHETECER>
+
+Condicion --> Expresion Operador Expresion
+
+Operador --> <MENORQUE>
+	| <MAYORQUE>
+	| <IGUAL>
+	| <MENORIGUAL>
+	| <MAYORIGUAL>
+	| <DISTINTO>
+
+Expresion --> Termino Ep
+Ep --> ((<MAS> | <MENOS>) Termino Ep)?
+
+Termino -->  Factor Tp
+Tp --> ((<PROD> | <DIV>) Factor  Tp)?
+
+Factor --> <NUMERO>
+	| <VARIABLE>
+	| <CADENA>
+	| <PARABI> Expresion <PARCER>
