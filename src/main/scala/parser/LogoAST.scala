@@ -2,18 +2,6 @@ package parser
 
 sealed trait LogoAST
 
-
-/*
-BloquePrograma --> (Procedimiento)* (Instruccion)*
-
-Procedimiento --> <TO> <PALABRA> ListaParams BloquePrograma <END>
-
-ListaParams --> (<VARIABLE>)*
-
-Instruccion --> Mover | Comando | Bucles | LlamadaProcedimiento
-*/
-
-
 case class Programa(procedimientos: List[Procedimiento], instrucciones: List[Instruccion]) extends LogoAST
 
 case class Procedimiento(nombre: String, parametros: ListaParams, bloque: Bloque)
