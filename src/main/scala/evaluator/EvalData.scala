@@ -3,26 +3,42 @@ package evaluator
 import errors.LogoCompilationError.LogoEvaluationError
 import evaluator.EvalData.EvalResult
 import util.Monoid
+import SymbolTable._
+
+import scala.util.Right
 
 case class EvalData(result: EvalResult, symbols: SymbolTable)
 
 object EvalData {
 
-  import scala.util.Right
-
   type EvalResult = Either[LogoEvaluationError, String]
 
-  val empty: EvalData = evaluator.EvalData(Right(""), SymbolTable.empty)
+  val empty: EvalData = EvalData(Right(""), SymbolTable.empty)
 
-  def withSymbols(s: SymbolTable) = evaluator.EvalData(Right(""), s)
+  def withSymbols(s: SymbolTable) = EvalData(Right(""), s)
 
-  implicit val evalDataMonoid = new Monoid[EvalData] {
+  implicit class EvalDataOps(evd: EvalData) {
+    def incVar(varName: String, inc: Int): EvalData = {
+      evd.symbols.vars.get(varName) match {
+        case None => evd.copy(symbols = evd.symbols + (varName, inc))
+        case Some(value) => evd.copy(symbols = evd.symbols + (varName, value + inc))
+      }
+    }
+  }
+
+  implicit val evalDataMonoid: Monoid[EvalData] = new Monoid[EvalData] {
     override def empty: EvalData = EvalData.empty
+
     override def combine(x: EvalData, y: EvalData): EvalData = {
       val result = for {
         xResult <- x.result
         yResult <- y.result
-      } yield xResult + " " + yResult
+      } yield {
+        if (xResult != "" && yResult != "") xResult + ";" + yResult
+        else if (xResult != "" && yResult == "") xResult
+        else if (xResult == "" && yResult != "") yResult
+        else ""
+      }
 
       EvalData(result, y.symbols)
     }

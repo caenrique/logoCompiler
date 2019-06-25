@@ -9,27 +9,39 @@ object ExpresionEvaluator {
 
   import evaluator.Value._
 
-  def evalNumber(expr: Expresion, s: SymbolTable, errMsg: String = "se esperaba un numero")
-                (f: Int => EvalData)
+  def eval(expr: Expresion, s: SymbolTable)
+          (f: Int => EvalData)
   : EvalData = {
     ExpresionEvaluator(expr, s) match {
-      case Left(err) => evaluator.EvalData(Left(err), s)
-      case Right(Left(number)) => f(number)
-      case _ => evaluator.EvalData(Left(LogoEvaluationError(errMsg)), s)
+      case Left(err) => EvalData(Left(err), s)
+      case Right(number) => f(number)
     }
   }
 
-  def eval2Numbers(expr1: Expresion, expr2: Expresion, s: SymbolTable, errMsg: String = "se esperaban 2 numeros")
-                  (f: (Int, Int) => EvalData)
+  def eval2(expr1: Expresion, expr2: Expresion, s: SymbolTable)
+           (f: (Int, Int) => EvalData)
   : EvalData = {
     val ab = for {
       aValue <- ExpresionEvaluator(expr1, s)
       bValue <- ExpresionEvaluator(expr2, s)
     } yield (aValue, bValue)
     ab match {
-      case Left(err) => evaluator.EvalData(Left(err), s)
-      case Right((Left(av), Left(bv))) => f(av, bv)
-      case _ => evaluator.EvalData(Left(LogoEvaluationError(errMsg)), s)
+      case Left(err) => EvalData(Left(err), s)
+      case Right((av, bv)) => f(av, bv)
+    }
+  }
+
+  def eval3(expr1: Expresion, expr2: Expresion, expr3: Expresion, s: SymbolTable)
+           (f: (Int, Int, Int) => EvalData)
+  : EvalData = {
+    val abc = for {
+      a <- ExpresionEvaluator(expr1, s)
+      b <- ExpresionEvaluator(expr2, s)
+      c <- ExpresionEvaluator(expr3, s)
+    } yield (a, b, c)
+    abc match {
+      case Left(err) => EvalData(Left(err), s)
+      case Right((a, b, c)) => f(a, b, c)
     }
   }
 
@@ -39,24 +51,19 @@ object ExpresionEvaluator {
   }
 
   private def nativaEval(nativa: NativaExpr, simbolos: SymbolTable): ValueResult = {
-    val exprValue: ValueResult = ExpresionEvaluator(nativa.parametro, simbolos)
-
-    exprValue match {
-      case Right(Left(num)) => nativa.funcion match {
-        case "random" => Right(Left(new Random(System.nanoTime()).nextInt(num)))
+    ExpresionEvaluator(nativa.parametro, simbolos).map { num =>
+      nativa.funcion match {
+        case "random" => new Random(System.nanoTime()).nextInt(num)
       }
-      case Right(_) => Left(LogoEvaluationError("No se puede calcular una expresion nativa con una cadena como parametro"))
-      case _ => exprValue
     }
   }
 
   private def factorEval(factor: Factor, simbolos: SymbolTable): ValueResult = factor match {
-    case Numero(n) => Right(Left(n))
+    case Numero(n) => Right(n)
     case Variable(n) => simbolos.vars.get(n) match {
       case Some(value) => Right(value)
       case None => Left(LogoEvaluationError(s"la variable $n no está definida"))
     }
-    case Cadena(c) => Right(Right(c))
     case n: NativaExpr => nativaEval(n, simbolos)
     case ParentesisExpr(expresion) => ExpresionEvaluator(expresion, simbolos)
   }
@@ -65,7 +72,7 @@ object ExpresionEvaluator {
     def computeLast(f: Factor, op: Operacion) = combineValues(op, _, factorEval(f, simbolos))
     def compute(f: Factor, op: Operacion, s: Tp) = (combineValues(op, _, factorEval(f, simbolos))).andThen(tpEval(s, simbolos))
     tp match {
-      case Por(f, None) => computeLast(f, Value.MULTIPLICACION)
+      case Por(f, None) => computeLast(f, Value.SUMA)
       case Por(f, Some(s)) => compute(f, Value.MULTIPLICACION, s)
       case Dividido(f, None) => computeLast(f, Value.DIVISION)
       case Dividido(f, Some(s)) => compute(f, Value.DIVISION, s)
@@ -90,12 +97,9 @@ object ExpresionEvaluator {
 
   // TODO: Extraer esta prueba a un test unitario
   def main(args: Array[String]): Unit = {
-    val result = ExpresionEvaluator(Expresion(Termino(Variable("hola"), None), Some(Mas(Termino(NativaExpr("random", Expresion(Termino(Numero(5),None),None)), None), None))), SymbolTable.empty.copy(vars = Map("hola" -> Left(4))))
+    val result = ExpresionEvaluator(Expresion(Termino(Variable("hola"), None), Some(Mas(Termino(Numero(6),Some(Dividido(Numero(2),None))),None))), SymbolTable.empty.copy(vars = Map("hola" -> 4)))
     result match {
-      case Right(value) => value match {
-        case Left(numero) => println(s"el resultado es $numero")
-        case Right(cadena) => println(s"el resultado es $cadena")
-      }
+      case Right(value) => println(s"el resultado es $value")
       case Left(LogoEvaluationError(msg)) => println(msg)
     }
   }

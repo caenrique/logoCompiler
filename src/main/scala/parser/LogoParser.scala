@@ -121,10 +121,9 @@ object LogoParser extends Parsers {
   def factor: Parser[Factor] = {
     val num = numero ^^ { case NUMERO(n) => Numero(n) }
     val vari = variable ^^ { case VARIABLE(str) => Variable(str) }
-    val cad = cadena ^^ { case CADENA(str) => Cadena(str) }
     val parentesisExpr = PARABI() ~ expresion ~ PARCER() ^^ { case _ ~ expr ~ _ => ParentesisExpr(expr) }
     val nativaExpr = nativa ~ expresion ^^ { case NATIVA(str) ~ expr => NativaExpr(str, expr) }
-    nativaExpr | num | vari | cad | parentesisExpr
+    nativaExpr | num | vari | parentesisExpr
   }
 
   def tp: Parser[Tp] = {

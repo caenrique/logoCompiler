@@ -1,15 +1,17 @@
 package compiler
 
 import errors.LogoCompilationError
-import parser.{LogoAST, LogoLexer, LogoParser}
+import evaluator.LogoCodeGenerator
+import parser.{LogoLexer, LogoParser}
 
 object LogoCompiler {
 
-  def apply(code: String): Either[LogoCompilationError, LogoAST] = {
+  def apply(code: String): Either[LogoCompilationError, String] = {
     for {
       tokens <- LogoLexer(code)
       ast <- LogoParser(tokens)
-    } yield ast
+      code <- LogoCodeGenerator(ast)
+    } yield code
   }
 
 }

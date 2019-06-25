@@ -60,7 +60,6 @@ case class Dividido(factor: Factor, tp: Option[Tp]) extends Tp
 sealed trait Factor
 case class Numero(valor: Int) extends Factor
 case class Variable(nombre: String) extends Factor
-case class Cadena(valor: String) extends Factor
 case class NativaExpr(funcion: String, parametro: Expresion) extends Factor
 case class ParentesisExpr(expr: Expresion) extends Factor
 
