@@ -1,6 +1,6 @@
 package parser
 
-import parser.LogoCompilationError.{Location, LogoLexerError}
+import errors.LogoCompilationError.{Location, LogoLexerError}
 
 import scala.util.parsing.combinator.RegexParsers
 

@@ -1,4 +1,7 @@
-package parser
+package compiler
+
+import errors.LogoCompilationError
+import parser.{LogoAST, LogoLexer, LogoParser}
 
 object LogoCompiler {
 

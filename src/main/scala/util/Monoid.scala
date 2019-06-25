@@ -1,6 +1,6 @@
-package parser
+package util
 
-import parser.Monoid.Semigroup
+import util.Monoid.Semigroup
 
 trait Monoid[A] extends Semigroup[A] {
   def empty: A

@@ -1,21 +1,21 @@
-package parser
+package evaluator
 
-import parser.LogoCompilationError.LogoEvaluationError
-import scala.util.{Left,Right}
+import errors.LogoCompilationError.LogoEvaluationError
+import parser._
 
-import scala.util.Random
+import scala.util.{Left, Random, Right}
 
 object ExpresionEvaluator {
 
-  import Value._
+  import evaluator.Value._
 
   def evalNumber(expr: Expresion, s: SymbolTable, errMsg: String = "se esperaba un numero")
                 (f: Int => EvalData)
   : EvalData = {
     ExpresionEvaluator(expr, s) match {
-      case Left(err) => EvalData(Left(err), s)
+      case Left(err) => evaluator.EvalData(Left(err), s)
       case Right(Left(number)) => f(number)
-      case _ => EvalData(Left(LogoEvaluationError(errMsg)), s)
+      case _ => evaluator.EvalData(Left(LogoEvaluationError(errMsg)), s)
     }
   }
 
@@ -27,9 +27,9 @@ object ExpresionEvaluator {
       bValue <- ExpresionEvaluator(expr2, s)
     } yield (aValue, bValue)
     ab match {
-      case Left(err) => EvalData(Left(err), s)
+      case Left(err) => evaluator.EvalData(Left(err), s)
       case Right((Left(av), Left(bv))) => f(av, bv)
-      case _ => EvalData(Left(LogoEvaluationError(errMsg)), s)
+      case _ => evaluator.EvalData(Left(LogoEvaluationError(errMsg)), s)
     }
   }
 

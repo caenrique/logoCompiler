@@ -1,7 +1,8 @@
-package parser
+package evaluator
 
-import parser.EvalData.EvalResult
-import parser.LogoCompilationError.LogoEvaluationError
+import errors.LogoCompilationError.LogoEvaluationError
+import evaluator.EvalData.EvalResult
+import util.Monoid
 
 case class EvalData(result: EvalResult, symbols: SymbolTable)
 
@@ -11,9 +12,9 @@ object EvalData {
 
   type EvalResult = Either[LogoEvaluationError, String]
 
-  val empty: EvalData = EvalData(Right(""), SymbolTable.empty)
+  val empty: EvalData = evaluator.EvalData(Right(""), SymbolTable.empty)
 
-  def withSymbols(s: SymbolTable) = EvalData(Right(""), s)
+  def withSymbols(s: SymbolTable) = evaluator.EvalData(Right(""), s)
 
   implicit val evalDataMonoid = new Monoid[EvalData] {
     override def empty: EvalData = EvalData.empty

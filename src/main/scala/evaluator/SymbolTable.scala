@@ -1,6 +1,7 @@
-package parser
+package evaluator
 
-import parser.Value.Value
+import evaluator.Value.Value
+import parser.Procedimiento
 
 case class SymbolTable(position: (Int, Int),
                        orientation: Int,
@@ -12,7 +13,7 @@ object SymbolTable {
 
   val emptyProcs = Map.empty[String, Procedimiento]
   val emptyVars = Map.empty[String, Value]
-  val empty = SymbolTable((0,0), 0, true, emptyProcs, emptyVars)
+  val empty = SymbolTable((0,0), 90, true, emptyProcs, emptyVars)
 
   implicit class SymbolTableOps(a: SymbolTable) {
     def withProcs(procs: Map[String, Procedimiento]) = a.copy(proc = a.proc ++ procs)

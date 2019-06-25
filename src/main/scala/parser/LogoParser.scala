@@ -1,6 +1,6 @@
 package parser
 
-import parser.LogoCompilationError.{Location, LogoParserError}
+import errors.LogoCompilationError.{Location, LogoParserError}
 
 import scala.util.parsing.combinator.Parsers
 import scala.util.parsing.input.{NoPosition, Position, Reader}

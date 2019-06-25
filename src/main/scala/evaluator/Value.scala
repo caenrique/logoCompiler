@@ -1,12 +1,10 @@
-package parser
+package evaluator
 
-import parser.LogoCompilationError.LogoEvaluationError
-
+import errors.LogoCompilationError.LogoEvaluationError
 
 object Value {
 
-  import scala.util.Left
-  import scala.util.Right
+  import scala.util.{Left, Right}
 
   type Value = Either[Int, String]
 

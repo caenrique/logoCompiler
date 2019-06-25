@@ -1,22 +1,22 @@
-package parser
+package evaluator
 
-import parser.EvalData.EvalResult
-import parser.LogoCompilationError.LogoEvaluationError
-import parser.Monoid._
+import evaluator.EvalData.EvalResult
+import parser._
+
+import scala.util.{Left, Right}
 
 object LogoCodeGenerator {
 
   import SymbolTable._
+  import util.Monoid._
 
-  import scala.util.{Left, Right}
-  // registrar la posicion de la tortuga y el estado del pen
   // Asumo que no existen ámbitos. Todas las variables son globales y se pueden leer si están definidas previamente.
   // Una vez que se definen, permanecen definidas hasta el final de la ejecución
 
   def apply(ast: LogoAST): EvalResult = ast match {
     case Programa(proc, instr) =>
       val procs = registraProcedimientos(proc)
-      val startEvalData = EvalData(Right(""), SymbolTable.empty.withProcs(procs))
+      val startEvalData = evaluator.EvalData(Right(""), SymbolTable.empty.withProcs(procs))
 
       instruccionesEval(instr, startEvalData).result
   }
@@ -37,32 +37,37 @@ object LogoCodeGenerator {
   }
 
   def moverEval(mover: Mover, simbolos: SymbolTable): EvalData = mover match {
+
     case Forward(expr) => ExpresionEvaluator.evalNumber(expr, simbolos) { distancia: Int =>
       val dx = distancia * Math.cos(simbolos.orientation.toRadians)
       val dy = distancia * Math.sin(simbolos.orientation.toRadians)
       val newX = (simbolos.position._1 + dx).toInt
       val newY = (simbolos.position._2 + dy).toInt
 
-      val code = if(simbolos.isPenUp) s"moveTo($newX, $newY)" else s"lineTo($newX, $newY)"
-      EvalData(Right(code), simbolos.setPosition(newX, newY))
+      val code = if (simbolos.isPenUp) s"moveTo($newX, $newY)" else s"lineTo($newX, $newY)"
+      evaluator.EvalData(Right(code), simbolos.setPosition(newX, newY))
     }
+
     case Backward(expr) => ExpresionEvaluator.evalNumber(expr, simbolos) { distancia: Int =>
       val dx = distancia * Math.cos(simbolos.orientation.toRadians)
       val dy = distancia * Math.sin(simbolos.orientation.toRadians)
       val newX = (simbolos.position._1 - dx).toInt
       val newY = (simbolos.position._2 - dy).toInt
 
-      val code = if(simbolos.isPenUp) s"moveTo($newX, $newY)" else s"lineTo($newX, $newY)"
-      EvalData(Right(code), simbolos.setPosition(newX, newY))
+      val code = if (simbolos.isPenUp) s"moveTo($newX, $newY)" else s"lineTo($newX, $newY)"
+      evaluator.EvalData(Right(code), simbolos.setPosition(newX, newY))
     }
+
     case parser.Right(expr) => ExpresionEvaluator.evalNumber(expr, simbolos) { angulo: Int =>
       val newSimbolos = simbolos.setOrientation(simbolos.orientation - angulo)
       EvalData.withSymbols(newSimbolos)
     }
+
     case parser.Left(expr) => ExpresionEvaluator.evalNumber(expr, simbolos) { angulo: Int =>
       val newSimbolos = simbolos.setOrientation(simbolos.orientation + angulo)
       EvalData.withSymbols(newSimbolos)
     }
+
     case LeftArc(radio, angulo) => ExpresionEvaluator.eval2Numbers(radio, angulo, simbolos) { (r: Int, a: Int) =>
       val anguloActual = simbolos.orientation
       val anguloHaciaOrigen = (anguloActual + 90) % 360
@@ -76,10 +81,11 @@ object LogoCodeGenerator {
       val nuevoX = xArco + (r * Math.cos((anguloActual - 90 + a).toRadians)).toInt
       val nuevoY = yArco + (r * Math.sin((anguloActual - 90 + a).toRadians)).toInt
 
-      val code = if(simbolos.isPenUp) s"moveTo($nuevoX, $nuevoY)" else s"arc($xArco, $yArco, $r, $anguloInicial, $anguloFinal)"
+      val code = if (simbolos.isPenUp) s"moveTo($nuevoX, $nuevoY)" else s"arc($xArco, $yArco, $r, $anguloInicial, $anguloFinal)"
       val newSymbols = simbolos.setPosition(nuevoX, nuevoY).setOrientation(nuevaOrientacion)
-      EvalData(scala.util.Right(code), newSymbols)
+      evaluator.EvalData(scala.util.Right(code), newSymbols)
     }
+
     case RightArc(radio, angulo) => ExpresionEvaluator.eval2Numbers(radio, angulo, simbolos) { (r: Int, a: Int) =>
       val anguloActual = simbolos.orientation
       val anguloHaciaOrigen = (anguloActual - 90) % 360
@@ -93,25 +99,30 @@ object LogoCodeGenerator {
       val nuevoX = xArco + (r * Math.cos((anguloActual + 90 - a).toRadians)).toInt
       val nuevoY = yArco + (r * Math.sin((anguloActual + 90 - a).toRadians)).toInt
 
-      val code = if(simbolos.isPenUp) s"moveTo($nuevoX, $nuevoY)" else s"arc($xArco, $yArco, $r, $anguloInicial, $anguloFinal)"
+      val code = if (simbolos.isPenUp) s"moveTo($nuevoX, $nuevoY)" else s"arc($xArco, $yArco, $r, $anguloInicial, $anguloFinal)"
       val newSymbols = simbolos.setPosition(nuevoX, nuevoY).setOrientation(nuevaOrientacion)
-      EvalData(scala.util.Right(code), newSymbols)
+      evaluator.EvalData(scala.util.Right(code), newSymbols)
     }
-    case Home => EvalData.withSymbols(simbolos.setPosition(0, 0))
-    case SetXY(x, y) => ExpresionEvaluator.eval2Numbers(x, y, simbolos, "No se pueden usar cadenas como posicion") {
-      (xv, yv) => EvalData.withSymbols(simbolos.setPosition(xv, yv))
+
+    case Home =>
+      val code = if (simbolos.isPenUp) "moveTo(0, 0)" else "lineTo(0, 0)"
+      evaluator.EvalData(Right(code), simbolos.setPosition(0, 0).setOrientation(90))
+
+    case SetXY(x, y) => ExpresionEvaluator.eval2Numbers(x, y, simbolos) { (xv: Int, yv: Int) =>
+      val code = if (simbolos.isPenUp) s"moveTo($xv, $yv)" else s"lineTo($xv, $yv)"
+      evaluator.EvalData(Right(code), simbolos.setPosition(xv, yv))
     }
   }
 
   def comandoEval(comando: Comando, simbolos: SymbolTable): EvalData = comando match {
-    case ClearScreen => EvalData(Right("clearScreen"), simbolos)
-    case PenDown => EvalData.withSymbols(simbolos.penDown)
+    case ClearScreen => EvalData.withSymbols(simbolos) // se ignora. Pasamos la SymbolTable tal cual
+    case PenDown => EvalData.withSymbols(simbolos.penDown) // se ignora. Pasamos la SymbolTable tal cual
     case PenUp => EvalData.withSymbols(simbolos.penUp)
-    case HideTurtle => ???
-    case ShowTurtle => ???
+    case HideTurtle => EvalData.withSymbols(simbolos) // se ignora. Pasamos la SymbolTable tal cual
+    case ShowTurtle => EvalData.withSymbols(simbolos) // se ignora. Pasamos la SymbolTable tal cual
     case Stop => ???
-    case Make(varName, expr) => ExpresionEvaluator(expr, simbolos) match {
-      case Left(err) => EvalData(Left(err), simbolos)
+    case Make(varName, expr) => evaluator.ExpresionEvaluator(expr, simbolos) match {
+      case Left(err) => evaluator.EvalData(Left(err), simbolos)
       case Right(value) => EvalData.withSymbols(simbolos + (varName, value))
     }
   }
@@ -127,7 +138,7 @@ object LogoCodeGenerator {
   }
 
   def bloqueEval(bloque: Bloque, simbolos: SymbolTable): EvalData = {
-    instruccionesEval(bloque.instrucciones, EvalData(Right(""), simbolos))
+    instruccionesEval(bloque.instrucciones, evaluator.EvalData(Right(""), simbolos))
   }
 
 }
