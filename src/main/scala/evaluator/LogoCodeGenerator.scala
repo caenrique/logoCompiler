@@ -124,7 +124,17 @@ object LogoCodeGenerator {
   }
 
   def comandoEval(comando: Comando, simbolos: SymbolTable): EvalData = comando match {
-    case ClearScreen => EvalData.withSymbols(simbolos) // se ignora. Pasamos la SymbolTable tal cual
+    case ClearScreen => {
+      val code = List(
+        "save()",
+        "setTransform(1, 0, 0, 1, 0, 0)",
+        "clearRect(0, 0, canvas.width, canvas.height)",
+        "restore()",
+        "beginPath()",
+        "moveTo(0,0)"
+      )
+      EvalData(Right(code), simbolos.setOrientation(90).setPosition(0,0))
+    }
     case PenDown => EvalData.withSymbols(simbolos.penDown) // se ignora. Pasamos la SymbolTable tal cual
     case PenUp => EvalData.withSymbols(simbolos.penUp)
     case HideTurtle => EvalData.withSymbols(simbolos) // se ignora. Pasamos la SymbolTable tal cual

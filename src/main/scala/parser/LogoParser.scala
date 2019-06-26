@@ -36,6 +36,10 @@ object LogoParser extends Parsers {
     accept("nativa", { case n @ NATIVA(str) => n })
   }
 
+  private def nativa2: Parser[NATIVA2] = {
+    accept("nativa2", { case n @ NATIVA2(str) => n })
+  }
+
   def ast: Parser[LogoAST] = {
     phrase(programa)
   }
@@ -74,8 +78,8 @@ object LogoParser extends Parsers {
   }
 
   def bucles: Parser[Bucles] = {
-    val forloop = FOR() ~ CORCHETEABI() ~ variable ~ expresion ~ expresion ~ expresion ~ CORCHETECER() ~ bloque ^^ {
-      case _ ~ _ ~ VARIABLE(str) ~ inicio ~ fin ~ inc ~ _ ~ bloq => For(str, inicio, fin, inc, bloq)
+    val forloop = FOR() ~ CORCHETEABI() ~ palabra ~ expresion ~ expresion ~ expresion ~ CORCHETECER() ~ bloque ^^ {
+      case _ ~ _ ~ PALABRA(str) ~ inicio ~ fin ~ inc ~ _ ~ bloq => For(str.toUpperCase, inicio, fin, inc, bloq)
     }
 
     val repeat = REPEAT() ~ expresion ~ bloque ^^ { case _ ~ expr1 ~ bloq => Repeat(expr1, bloq) }
@@ -123,7 +127,8 @@ object LogoParser extends Parsers {
     val vari = variable ^^ { case VARIABLE(str) => Variable(str) }
     val parentesisExpr = PARABI() ~ expresion ~ PARCER() ^^ { case _ ~ expr ~ _ => ParentesisExpr(expr) }
     val nativaExpr = nativa ~ expresion ^^ { case NATIVA(str) ~ expr => NativaExpr(str, expr) }
-    nativaExpr | num | vari | parentesisExpr
+    val nativa2Expr = nativa2 ~ expresion ~ expresion ^^ { case NATIVA2(str) ~ expr ~ expr2 => Nativa2Expr(str, expr, expr2) }
+    nativaExpr | nativa2Expr | num | vari | parentesisExpr
   }
 
   def tp: Parser[Tp] = {

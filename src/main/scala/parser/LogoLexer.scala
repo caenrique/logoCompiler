@@ -6,13 +6,14 @@ import scala.util.parsing.combinator.RegexParsers
 
 object LogoLexer extends RegexParsers {
   override def skipWhitespace: Boolean = true
-  override val whiteSpace = "[ \t\r\f\n]+".r
+  override val whiteSpace = "(\\s|;.*)+".r
 
   def numero: Parser[NUMERO] = positioned { "[0-9]+".r ^^ { str => NUMERO(str.toInt) } }
   def variable: Parser[VARIABLE] = positioned { ":[a-zA-Z][a-zA-Z0-9]*".r ^^ { str => VARIABLE(str.substring(1, str.length).toUpperCase) } }
   def cadena: Parser[CADENA] = positioned { """"[a-zA-Z][a-zA-Z0-9]*""".r ^^ { str => CADENA(str.substring(1, str.length).toUpperCase) } }
   def palabra: Parser[PALABRA] = positioned { "[a-zA-Z][a-zA-Z0-9]*".r ^^ { str => PALABRA(str) } }
   def nativa: Parser[NATIVA] = positioned { "(?i)random|sin|cos|abs".r ^^ { str => NATIVA(str) } }
+  def nativa2: Parser[NATIVA2] = positioned { "(?i)mod".r ^^ { str => NATIVA2(str) } }
 
   def parabi = positioned { "(" ^^^ PARABI() }
   def parcer = positioned { ")" ^^^ PARCER() }
@@ -50,7 +51,7 @@ object LogoLexer extends RegexParsers {
   def end = positioned { "(?i)end".r ^^^ END() }
 
   def tokens: Parser[List[LogoToken]] = {
-    phrase(rep(palabra ||| variable ||| numero ||| cadena ||| nativa ||| forloop ||| repeat ||| ifclause ||| cs ||| pu ||| pd ||| ht ||| st ||| stop ||| make
+    phrase(rep(palabra ||| variable ||| numero ||| cadena ||| nativa ||| nativa2 ||| forloop ||| repeat ||| ifclause ||| cs ||| pu ||| pd ||| ht ||| st ||| stop ||| make
       ||| fd ||| bk ||| rt ||| lt ||| arcr ||| arcl ||| home ||| setxy ||| parabi ||| parcer ||| corcheteabi
       ||| corchetecer ||| menorque ||| mayorque ||| igual ||| menorigual ||| mayorigual ||| distinto
       ||| mas ||| menos ||| prod ||| div ||| to ||| end))

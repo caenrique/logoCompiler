@@ -61,6 +61,7 @@ sealed trait Factor
 case class Numero(valor: Int) extends Factor
 case class Variable(nombre: String) extends Factor
 case class NativaExpr(funcion: String, parametro: Expresion) extends Factor
+case class Nativa2Expr(funcion: String, parametro1: Expresion, parametro2: Expresion) extends Factor
 case class ParentesisExpr(expr: Expresion) extends Factor
 
 

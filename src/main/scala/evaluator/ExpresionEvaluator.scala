@@ -38,6 +38,18 @@ object ExpresionEvaluator {
     }
   }
 
+  def apply2(expr1: Expresion, expr2: Expresion, s: SymbolTable)(f: (Int, Int) => ValueResult)
+  : ValueResult = {
+    val val12 = for {
+      val1 <- ExpresionEvaluator(expr1, s)
+      val2 <- ExpresionEvaluator(expr2, s)
+    } yield (val1, val2)
+    val12 match {
+      case Left(err) => Left(err)
+      case Right((n1, n2)) => f(n1, n2)
+    }
+  }
+
   def apply(expresion: Expresion, simbolos: SymbolTable): ValueResult = {
     val epResult = expresion.ep.map(epEval(_, simbolos)).getOrElse(identity(_: ValueResult))
     epResult(terminoEval(expresion.termino, simbolos))
@@ -47,6 +59,16 @@ object ExpresionEvaluator {
     ExpresionEvaluator(nativa.parametro, simbolos).map { num =>
       nativa.funcion match {
         case "random" => new Random(System.nanoTime()).nextInt(num)
+        case "cos" => (Math.cos(num.toRadians)*100).toInt
+        case "sin" => (Math.sin(num.toRadians)*100).toInt
+      }
+    }
+  }
+
+  private def nativa2Eval(nativa: Nativa2Expr, simbolos: SymbolTable): ValueResult = {
+    ExpresionEvaluator.apply2(nativa.parametro1, nativa.parametro2, simbolos) { (num1, num2) =>
+      nativa.funcion match {
+        case "mod" => Right(num1 % num2)
       }
     }
   }
@@ -58,6 +80,7 @@ object ExpresionEvaluator {
       case None => Left(LogoEvaluationError(s"la variable $n no está definida"))
     }
     case n: NativaExpr => nativaEval(n, simbolos)
+    case n: Nativa2Expr => nativa2Eval(n, simbolos)
     case ParentesisExpr(expresion) => ExpresionEvaluator(expresion, simbolos)
   }
 

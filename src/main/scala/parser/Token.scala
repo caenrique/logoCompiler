@@ -9,6 +9,7 @@ case class NUMERO(value: Int) extends LogoToken
 case class CADENA(str: String) extends LogoToken
 case class PALABRA(str: String) extends LogoToken
 case class NATIVA(str: String) extends LogoToken
+case class NATIVA2(str: String) extends LogoToken
 case class PARABI() extends LogoToken
 case class PARCER() extends LogoToken
 case class CORCHETEABI() extends LogoToken
