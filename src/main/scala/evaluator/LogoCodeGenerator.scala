@@ -194,16 +194,17 @@ object LogoCodeGenerator {
     case LlamadaProcedimiento(nombre, expresiones) =>
       simbolos.proc.get(nombre).map { case Procedimiento(_, variables, bloque) =>
         if(variables.length == expresiones.length) {
+          val (x, y) = simbolos.position
           if(variables.nonEmpty) {
             ExpresionEvaluator.evalN(expresiones, simbolos) { parametros =>
               // Los procedimientos tienen su propio ambito de variables, pero si pueden llamar a procedimientos definidos
               // fuera. Los procedimientos que definan dentro solo son visibles dentro, al igual que las variables
               // Las variables visibles dentro de un procedimiento solo son las que recibe por parametro
               val simbolosConParametros = simbolos.replaceVars(variables.zip(parametros).toMap)
-              evalPrograma(bloque, simbolosConParametros).replaceVarsProcs(simbolos)
+              evalPrograma(bloque, simbolosConParametros) + EvalData(Right(s"moveTo($x, $y)"), simbolos)
             }
           } else {
-            evalPrograma(bloque, simbolos).replaceVarsProcs(simbolos)
+            evalPrograma(bloque, simbolos) + EvalData(Right(s"moveTo($x, $y)"), simbolos)
           }
         } else {
           EvalData(Left(LogoEvaluationError(s"El procedimiento $nombre tiene que recibir ${variables.length} parametros")), simbolos)
