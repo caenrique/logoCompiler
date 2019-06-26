@@ -1,7 +1,7 @@
 package compiler
 
 import errors.LogoCompilationError
-import evaluator.LogoCodeGenerator
+import evaluator.{LogoCodeFormater, LogoCodeGenerator}
 import parser.{LogoLexer, LogoParser}
 
 object LogoCompiler {
@@ -10,8 +10,8 @@ object LogoCompiler {
     for {
       tokens <- LogoLexer(code)
       ast <- LogoParser(tokens)
-      code <- LogoCodeGenerator(ast)
-    } yield code
+      instructions <- LogoCodeGenerator(ast)
+    } yield LogoCodeFormater(instructions)
   }
 
 }

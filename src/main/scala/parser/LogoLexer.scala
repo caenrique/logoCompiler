@@ -9,15 +9,15 @@ object LogoLexer extends RegexParsers {
   override val whiteSpace = "[ \t\r\f\n]+".r
 
   def numero: Parser[NUMERO] = positioned { "[0-9]+".r ^^ { str => NUMERO(str.toInt) } }
-  def variable: Parser[VARIABLE] = positioned { ":[a-zA-Z][a-zA-Z0-9]*".r ^^ { str => VARIABLE(str.substring(1, str.length)) } }
-  def cadena: Parser[CADENA] = positioned { """"[a-zA-Z][a-zA-Z0-9]*""".r ^^ { str => CADENA(str.substring(1, str.length)) } }
+  def variable: Parser[VARIABLE] = positioned { ":[a-zA-Z][a-zA-Z0-9]*".r ^^ { str => VARIABLE(str.substring(1, str.length).toUpperCase) } }
+  def cadena: Parser[CADENA] = positioned { """"[a-zA-Z][a-zA-Z0-9]*""".r ^^ { str => CADENA(str.substring(1, str.length).toUpperCase) } }
   def palabra: Parser[PALABRA] = positioned { "[a-zA-Z][a-zA-Z0-9]*".r ^^ { str => PALABRA(str) } }
   def nativa: Parser[NATIVA] = positioned { "(?i)random|sin|cos|abs".r ^^ { str => NATIVA(str) } }
 
   def parabi = positioned { "(" ^^^ PARABI() }
   def parcer = positioned { ")" ^^^ PARCER() }
-  def corcheteabi = positioned { "{" ^^^ CORCHETEABI() }
-  def corchetecer = positioned { "}" ^^^ CORCHETECER() }
+  def corcheteabi = positioned { "[" ^^^ CORCHETEABI() }
+  def corchetecer = positioned { "]" ^^^ CORCHETECER() }
   def menorque = positioned { "<" ^^^ MENORQUE() }
   def mayorque = positioned { ">" ^^^ MAYORQUE() }
   def igual = positioned { "==" ^^^ IGUAL() }

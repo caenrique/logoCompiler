@@ -54,7 +54,7 @@ object LogoCodeGenerator {
       val newY = Number.roundAt(4)(simbolos.position._2 + dy)
 
       val code = if (simbolos.isPenUp) s"moveTo($newX, $newY)" else s"lineTo($newX, $newY)"
-      evaluator.EvalData(Right(code), simbolos.setPosition(newX, newY))
+      EvalData(Right(List(code)), simbolos.setPosition(newX, newY))
     }
 
     case Backward(expr) => ExpresionEvaluator.eval(expr, simbolos) { distancia: Int =>
@@ -64,7 +64,7 @@ object LogoCodeGenerator {
       val newY = Number.roundAt(4)(simbolos.position._2 - dy)
 
       val code = if (simbolos.isPenUp) s"moveTo($newX, $newY)" else s"lineTo($newX, $newY)"
-      evaluator.EvalData(Right(code), simbolos.setPosition(newX, newY))
+      EvalData(Right(List(code)), simbolos.setPosition(newX, newY))
     }
 
     case parser.Right(expr) => ExpresionEvaluator.eval(expr, simbolos) { angulo: Int =>
@@ -85,14 +85,14 @@ object LogoCodeGenerator {
       val xArco = simbolos.position._1 + dx
       val yArco = simbolos.position._2 + dy
       val anguloInicial = (anguloHaciaOrigen + 180) % 360
-      val anguloFinal = (anguloInicial + a) % 360
+      val anguloFinal = anguloInicial + a
       val nuevaOrientacion = (anguloActual + a) % 360
-      val nuevoX = Number.roundAt(4)(xArco + (r * Math.cos((anguloActual - 90 + a).toRadians)))
-      val nuevoY = Number.roundAt(4)(yArco + (r * Math.sin((anguloActual - 90 + a).toRadians)))
+      val nuevoX = Number.roundAt(4)(xArco + (r * Math.cos(anguloFinal.toRadians)))
+      val nuevoY = Number.roundAt(4)(yArco + (r * Math.sin(anguloFinal.toRadians)))
 
-      val code = if (simbolos.isPenUp) s"moveTo($nuevoX, $nuevoY)" else s"arc($xArco, $yArco, $r, $anguloInicial, $anguloFinal)"
+      val code = if (simbolos.isPenUp) s"moveTo($nuevoX, $nuevoY)" else s"arc($xArco, $yArco, $r, ${anguloInicial.toRadians}, ${anguloFinal.toRadians})"
       val newSymbols = simbolos.setPosition(nuevoX, nuevoY).setOrientation(nuevaOrientacion)
-      evaluator.EvalData(scala.util.Right(code), newSymbols)
+      evaluator.EvalData(Right(List(code)), newSymbols)
     }
 
     case RightArc(radio, angulo) => ExpresionEvaluator.eval2(radio, angulo, simbolos) { (r: Int, a: Int) =>
@@ -103,23 +103,23 @@ object LogoCodeGenerator {
       val xArco = simbolos.position._1 + dx
       val yArco = simbolos.position._2 + dy
       val anguloInicial = (anguloHaciaOrigen + 180) % 360
-      val anguloFinal = (anguloInicial - a) % 360
+      val anguloFinal = anguloInicial - a
       val nuevaOrientacion = (anguloActual - a) % 360
-      val nuevoX = Number.roundAt(4)(xArco + (r * Math.cos((anguloActual + 90 - a).toRadians)))
-      val nuevoY = Number.roundAt(4)(yArco + (r * Math.sin((anguloActual + 90 - a).toRadians)))
+      val nuevoX = Number.roundAt(4)(xArco + (r * Math.cos(anguloFinal.toRadians)))
+      val nuevoY = Number.roundAt(4)(yArco + (r * Math.sin(anguloFinal.toRadians)))
 
-      val code = if (simbolos.isPenUp) s"moveTo($nuevoX, $nuevoY)" else s"arc($xArco, $yArco, $r, $anguloInicial, $anguloFinal)"
+      val code = if (simbolos.isPenUp) s"moveTo($nuevoX, $nuevoY)" else s"arc($xArco, $yArco, $r, ${anguloInicial.toRadians}, ${anguloFinal.toRadians}, true)"
       val newSymbols = simbolos.setPosition(nuevoX, nuevoY).setOrientation(nuevaOrientacion)
-      evaluator.EvalData(scala.util.Right(code), newSymbols)
+      evaluator.EvalData(Right(List(code)), newSymbols)
     }
 
     case Home =>
       val code = if (simbolos.isPenUp) "moveTo(0, 0)" else "lineTo(0, 0)"
-      evaluator.EvalData(Right(code), simbolos.setPosition(0, 0).setOrientation(90))
+      evaluator.EvalData(Right(List(code)), simbolos.setPosition(0, 0).setOrientation(90))
 
     case SetXY(x, y) => ExpresionEvaluator.eval2(x, y, simbolos) { (xv: Int, yv: Int) =>
       val code = if (simbolos.isPenUp) s"moveTo($xv, $yv)" else s"lineTo($xv, $yv)"
-      evaluator.EvalData(Right(code), simbolos.setPosition(xv, yv))
+      evaluator.EvalData(Right(List(code)), simbolos.setPosition(xv, yv))
     }
   }
 
@@ -144,7 +144,7 @@ object LogoCodeGenerator {
         ExpresionEvaluator.eval3(inicioExpr, finExpr, incrementoExpr, simbolos) { (ini, fin, inc) =>
           if(ini >= fin) EvalData.withSymbols(simbolos)
           else {
-            val numIterations = Math.ceil((fin - ini) / inc).toInt
+            val numIterations = Math.ceil((fin - ini + 1).toDouble / inc).toInt
             val startEvalData = EvalData.withSymbols(simbolos + (indice, ini))
 
             (1 to numIterations).map(_ => bloque).foldLeft(startEvalData) { (data, nextBloque) =>
@@ -201,10 +201,10 @@ object LogoCodeGenerator {
               // fuera. Los procedimientos que definan dentro solo son visibles dentro, al igual que las variables
               // Las variables visibles dentro de un procedimiento solo son las que recibe por parametro
               val simbolosConParametros = simbolos.replaceVars(variables.zip(parametros).toMap)
-              evalPrograma(bloque, simbolosConParametros) + EvalData(Right(s"moveTo($x, $y)"), simbolos)
+              evalPrograma(bloque, simbolosConParametros) + EvalData(Right(List(s"moveTo($x, $y)")), simbolos)
             }
           } else {
-            evalPrograma(bloque, simbolos) + EvalData(Right(s"moveTo($x, $y)"), simbolos)
+            evalPrograma(bloque, simbolos) + EvalData(Right(List(s"moveTo($x, $y)")), simbolos)
           }
         } else {
           EvalData(Left(LogoEvaluationError(s"El procedimiento $nombre tiene que recibir ${variables.length} parametros")), simbolos)

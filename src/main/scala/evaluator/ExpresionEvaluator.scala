@@ -65,7 +65,7 @@ object ExpresionEvaluator {
     def computeLast(f: Factor, op: Operacion) = combineValues(op, _, factorEval(f, simbolos))
     def compute(f: Factor, op: Operacion, s: Tp) = (combineValues(op, _, factorEval(f, simbolos))).andThen(tpEval(s, simbolos))
     tp match {
-      case Por(f, None) => computeLast(f, Value.SUMA)
+      case Por(f, None) => computeLast(f, Value.MULTIPLICACION)
       case Por(f, Some(s)) => compute(f, Value.MULTIPLICACION, s)
       case Dividido(f, None) => computeLast(f, Value.DIVISION)
       case Dividido(f, Some(s)) => compute(f, Value.DIVISION, s)

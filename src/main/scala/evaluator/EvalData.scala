@@ -11,11 +11,11 @@ case class EvalData(result: EvalResult, symbols: SymbolTable)
 
 object EvalData {
 
-  type EvalResult = Either[LogoEvaluationError, String]
+  type EvalResult = Either[LogoEvaluationError, List[String]]
 
-  val empty: EvalData = EvalData(Right(""), SymbolTable.empty)
+  val empty: EvalData = EvalData(Right(Nil), SymbolTable.empty)
 
-  def withSymbols(s: SymbolTable) = EvalData(Right(""), s)
+  def withSymbols(s: SymbolTable) = EvalData(Right(Nil), s)
 
   implicit class EvalDataOps(evd: EvalData) {
     def incVar(varName: String, inc: Int): EvalData = {
@@ -34,12 +34,7 @@ object EvalData {
       val result = for {
         xResult <- x.result
         yResult <- y.result
-      } yield {
-        if (xResult != "" && yResult != "") xResult + ";" + yResult
-        else if (xResult != "" && yResult == "") xResult
-        else if (xResult == "" && yResult != "") yResult
-        else ""
-      }
+      } yield xResult ++ yResult
 
       EvalData(result, y.symbols)
     }

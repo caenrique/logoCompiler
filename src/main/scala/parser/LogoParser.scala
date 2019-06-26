@@ -74,8 +74,8 @@ object LogoParser extends Parsers {
   }
 
   def bucles: Parser[Bucles] = {
-    val forloop = FOR() ~ CORCHETEABI() ~ palabra ~ expresion ~ expresion ~ expresion ~ CORCHETECER() ~ bloque ^^ {
-      case _ ~ _ ~ PALABRA(str) ~ inicio ~ fin ~ inc ~ _ ~ bloq => For(str, inicio, fin, inc, bloq)
+    val forloop = FOR() ~ CORCHETEABI() ~ variable ~ expresion ~ expresion ~ expresion ~ CORCHETECER() ~ bloque ^^ {
+      case _ ~ _ ~ VARIABLE(str) ~ inicio ~ fin ~ inc ~ _ ~ bloq => For(str, inicio, fin, inc, bloq)
     }
 
     val repeat = REPEAT() ~ expresion ~ bloque ^^ { case _ ~ expr1 ~ bloq => Repeat(expr1, bloq) }
