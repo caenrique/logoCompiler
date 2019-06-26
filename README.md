@@ -1,5 +1,5 @@
 ---
-title: Memoria
+title: Compilador de LOGO a HTML5
 author: César Enrique Ramírez
 date: Junio 2019
 documentclass: article
