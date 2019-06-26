@@ -15,6 +15,8 @@ object SymbolTable {
   val empty = SymbolTable((0,0), 90, true, emptyProcs, emptyVars)
 
   implicit class SymbolTableOps(a: SymbolTable) {
+    def replaceVars(vars: Map[String, Int]) = a.copy(vars = vars)
+    def replaceProcs(procs: Map[String, Procedimiento]) = a.copy(proc = procs)
     def withProcs(procs: Map[String, Procedimiento]) = a.copy(proc = a.proc ++ procs)
     def +(variable: (String, Int)) = a.copy(vars = a.vars + variable)
     def penDown = a.copy(isPenUp = false)

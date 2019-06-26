@@ -1,7 +1,9 @@
 package evaluator
 
+import errors.LogoCompilationError.LogoEvaluationError
 import evaluator.EvalData.EvalResult
 import parser._
+import util.Number
 
 import scala.util.{Left, Right}
 
@@ -14,19 +16,24 @@ object LogoCodeGenerator {
   // Una vez que se definen, permanecen definidas hasta el final de la ejecución
 
   def apply(ast: LogoAST): EvalResult = ast match {
-    case Programa(proc, instr) =>
-      //val procs = registraProcedimientos(proc)
-      val startEvalData = evaluator.EvalData(Right(""), SymbolTable.empty)
-
-      val evalData = instruccionesEval(instr, startEvalData)
+    case p: Programa =>
+      val evalData = evalPrograma(p, SymbolTable.empty)
       println(evalData.symbols.pprint)
       evalData.result
   }
 
-  def registraProcedimientos(value: List[Procedimiento]): Map[String, Procedimiento] = ???
+  def evalPrograma(programa: Programa, simbolos: SymbolTable): EvalData = programa match {
+    case Programa(proc, instr) =>
+      val procs = registraProcedimientos(proc)
+      instruccionesEval(instr, simbolos.withProcs(procs))
+  }
 
-  def instruccionesEval(instrucciones: List[Instruccion], startEvalData: EvalData): EvalData = {
-    instrucciones.foldLeft(startEvalData) {
+  def registraProcedimientos(value: List[Procedimiento]): Map[String, Procedimiento] = {
+    value.map { case p @ Procedimiento(nombre, _, _) => (nombre, p) }.toMap
+  }
+
+  def instruccionesEval(instrucciones: List[Instruccion], simbolos: SymbolTable): EvalData = {
+    instrucciones.foldLeft(EvalData.withSymbols(simbolos)) {
       case (evalData, nextInstr) => evalData + instruccionEval(nextInstr, evalData.symbols)
     }
   }
@@ -35,7 +42,7 @@ object LogoCodeGenerator {
     case m: Mover => moverEval(m, simbolos)
     case c: Comando => comandoEval(c, simbolos)
     case b: Bucles => buclesEval(b, simbolos)
-    case p: LlamadaProcedimiento => ???
+    case p: LlamadaProcedimiento => llamadaProcedimientoEval(p, simbolos)
   }
 
   def moverEval(mover: Mover, simbolos: SymbolTable): EvalData = mover match {
@@ -43,8 +50,8 @@ object LogoCodeGenerator {
     case Forward(expr) => ExpresionEvaluator.eval(expr, simbolos) { distancia: Int =>
       val dx = distancia * Math.cos(simbolos.orientation.toRadians)
       val dy = distancia * Math.sin(simbolos.orientation.toRadians)
-      val newX = simbolos.position._1 + dx
-      val newY = simbolos.position._2 + dy
+      val newX = Number.roundAt(4)(simbolos.position._1 + dx)
+      val newY = Number.roundAt(4)(simbolos.position._2 + dy)
 
       val code = if (simbolos.isPenUp) s"moveTo($newX, $newY)" else s"lineTo($newX, $newY)"
       evaluator.EvalData(Right(code), simbolos.setPosition(newX, newY))
@@ -53,8 +60,8 @@ object LogoCodeGenerator {
     case Backward(expr) => ExpresionEvaluator.eval(expr, simbolos) { distancia: Int =>
       val dx = distancia * Math.cos(simbolos.orientation.toRadians)
       val dy = distancia * Math.sin(simbolos.orientation.toRadians)
-      val newX = simbolos.position._1 - dx
-      val newY = simbolos.position._2 - dy
+      val newX = Number.roundAt(4)(simbolos.position._1 - dx)
+      val newY = Number.roundAt(4)(simbolos.position._2 - dy)
 
       val code = if (simbolos.isPenUp) s"moveTo($newX, $newY)" else s"lineTo($newX, $newY)"
       evaluator.EvalData(Right(code), simbolos.setPosition(newX, newY))
@@ -80,8 +87,8 @@ object LogoCodeGenerator {
       val anguloInicial = (anguloHaciaOrigen + 180) % 360
       val anguloFinal = (anguloInicial + a) % 360
       val nuevaOrientacion = (anguloActual + a) % 360
-      val nuevoX = xArco + (r * Math.cos((anguloActual - 90 + a).toRadians))
-      val nuevoY = yArco + (r * Math.sin((anguloActual - 90 + a).toRadians))
+      val nuevoX = Number.roundAt(4)(xArco + (r * Math.cos((anguloActual - 90 + a).toRadians)))
+      val nuevoY = Number.roundAt(4)(yArco + (r * Math.sin((anguloActual - 90 + a).toRadians)))
 
       val code = if (simbolos.isPenUp) s"moveTo($nuevoX, $nuevoY)" else s"arc($xArco, $yArco, $r, $anguloInicial, $anguloFinal)"
       val newSymbols = simbolos.setPosition(nuevoX, nuevoY).setOrientation(nuevaOrientacion)
@@ -98,8 +105,8 @@ object LogoCodeGenerator {
       val anguloInicial = (anguloHaciaOrigen + 180) % 360
       val anguloFinal = (anguloInicial - a) % 360
       val nuevaOrientacion = (anguloActual - a) % 360
-      val nuevoX = xArco + (r * Math.cos((anguloActual + 90 - a).toRadians))
-      val nuevoY = yArco + (r * Math.sin((anguloActual + 90 - a).toRadians))
+      val nuevoX = Number.roundAt(4)(xArco + (r * Math.cos((anguloActual + 90 - a).toRadians)))
+      val nuevoY = Number.roundAt(4)(yArco + (r * Math.sin((anguloActual + 90 - a).toRadians)))
 
       val code = if (simbolos.isPenUp) s"moveTo($nuevoX, $nuevoY)" else s"arc($xArco, $yArco, $r, $anguloInicial, $anguloFinal)"
       val newSymbols = simbolos.setPosition(nuevoX, nuevoY).setOrientation(nuevaOrientacion)
@@ -183,8 +190,29 @@ object LogoCodeGenerator {
     }
   }
 
+  def llamadaProcedimientoEval(procedimiento: LlamadaProcedimiento, simbolos: SymbolTable): EvalData = procedimiento match {
+    case LlamadaProcedimiento(nombre, expresiones) =>
+      simbolos.proc.get(nombre).map { case Procedimiento(_, variables, bloque) =>
+        if(variables.length == expresiones.length) {
+          if(variables.nonEmpty) {
+            ExpresionEvaluator.evalN(expresiones, simbolos) { parametros =>
+              // Los procedimientos tienen su propio ambito de variables, pero si pueden llamar a procedimientos definidos
+              // fuera. Los procedimientos que definan dentro solo son visibles dentro, al igual que las variables
+              // Las variables visibles dentro de un procedimiento solo son las que recibe por parametro
+              val simbolosConParametros = simbolos.replaceVars(variables.zip(parametros).toMap)
+              evalPrograma(bloque, simbolosConParametros).replaceVarsProcs(simbolos)
+            }
+          } else {
+            evalPrograma(bloque, simbolos).replaceVarsProcs(simbolos)
+          }
+        } else {
+          EvalData(Left(LogoEvaluationError(s"El procedimiento $nombre tiene que recibir ${variables.length} parametros")), simbolos)
+        }
+      }.getOrElse(EvalData(Left(LogoEvaluationError(s"El procedimiento $nombre no está definido")), simbolos))
+  }
+
   def bloqueEval(bloque: Bloque, simbolos: SymbolTable): EvalData = {
-    instruccionesEval(bloque.instrucciones, evaluator.EvalData(Right(""), simbolos))
+    instruccionesEval(bloque.instrucciones, simbolos)
   }
 
 }

@@ -42,3 +42,4 @@ case class ARCL() extends LogoToken
 case class HOME() extends LogoToken
 case class SETXY() extends LogoToken
 case class TO() extends LogoToken
+case class END() extends LogoToken

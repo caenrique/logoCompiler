@@ -45,11 +45,11 @@ object LogoParser extends Parsers {
   }
 
   def procedimiento: Parser[Procedimiento] = {
-    TO() ~ palabra ~ listaParams ~ bloque ^^ { case _ ~ PALABRA(str) ~ params ~ bloque => Procedimiento(str, params, bloque) }
+    TO() ~ palabra ~ listaParams ~ programa ~ END()^^ { case _ ~ PALABRA(str) ~ params ~ programa ~ _ => Procedimiento(str, params, programa) }
   }
 
-  def listaParams: Parser[ListaParams] = {
-    variable.* ^^ (variables => ListaParams(variables.map { case VARIABLE(str) => Variable(str) }))
+  def listaParams: Parser[List[String]] = {
+    variable.* ^^ (variables => variables.map { case VARIABLE(str) => str })
   }
 
   def instruccion: Parser[Instruccion] = {

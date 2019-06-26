@@ -4,7 +4,7 @@ sealed trait LogoAST
 
 case class Programa(procedimientos: List[Procedimiento], instrucciones: List[Instruccion]) extends LogoAST
 
-case class Procedimiento(nombre: String, parametros: ListaParams, bloque: Bloque)
+case class Procedimiento(nombre: String, parametros: List[String], bloquePrograma: Programa)
 case class ListaParams(parametros: List[Variable])
 
 sealed trait Instruccion

@@ -47,12 +47,13 @@ object LogoLexer extends RegexParsers {
   def home = positioned { "(?i)home".r ^^^ HOME() }
   def setxy = positioned { "(?i)setxy".r ^^^ SETXY() }
   def to = positioned { "(?i)to".r ^^^ TO() }
+  def end = positioned { "(?i)end".r ^^^ END() }
 
   def tokens: Parser[List[LogoToken]] = {
     phrase(rep(palabra ||| variable ||| numero ||| cadena ||| nativa ||| forloop ||| repeat ||| ifclause ||| cs ||| pu ||| pd ||| ht ||| st ||| stop ||| make
       ||| fd ||| bk ||| rt ||| lt ||| arcr ||| arcl ||| home ||| setxy ||| parabi ||| parcer ||| corcheteabi
       ||| corchetecer ||| menorque ||| mayorque ||| igual ||| menorigual ||| mayorigual ||| distinto
-      ||| mas ||| menos ||| prod ||| div ||| to))
+      ||| mas ||| menos ||| prod ||| div ||| to ||| end))
   }
 
   def apply(code: String): Either[LogoLexerError, List[LogoToken]] = {

@@ -9,8 +9,7 @@ object ExpresionEvaluator {
 
   import evaluator.Value._
 
-  def eval(expr: Expresion, s: SymbolTable)
-          (f: Int => EvalData)
+  def eval(expr: Expresion, s: SymbolTable)(f: Int => EvalData)
   : EvalData = {
     ExpresionEvaluator(expr, s) match {
       case Left(err) => EvalData(Left(err), s)
@@ -18,30 +17,24 @@ object ExpresionEvaluator {
     }
   }
 
-  def eval2(expr1: Expresion, expr2: Expresion, s: SymbolTable)
-           (f: (Int, Int) => EvalData)
+  def eval2(expr1: Expresion, expr2: Expresion, s: SymbolTable)(f: (Int, Int) => EvalData)
   : EvalData = {
-    val ab = for {
-      aValue <- ExpresionEvaluator(expr1, s)
-      bValue <- ExpresionEvaluator(expr2, s)
-    } yield (aValue, bValue)
-    ab match {
-      case Left(err) => EvalData(Left(err), s)
-      case Right((av, bv)) => f(av, bv)
-    }
+    val ff: List[Int] => (Int, Int) = { case a :: b :: _ => (a, b) }
+    evalN(List(expr1, expr2), s)(f.tupled.compose(ff))
   }
 
-  def eval3(expr1: Expresion, expr2: Expresion, expr3: Expresion, s: SymbolTable)
-           (f: (Int, Int, Int) => EvalData)
+  def eval3(expr1: Expresion, expr2: Expresion, expr3: Expresion, s: SymbolTable)(f: (Int, Int, Int) => EvalData)
   : EvalData = {
-    val abc = for {
-      a <- ExpresionEvaluator(expr1, s)
-      b <- ExpresionEvaluator(expr2, s)
-      c <- ExpresionEvaluator(expr3, s)
-    } yield (a, b, c)
-    abc match {
+    val fff: List[Int] => (Int, Int, Int) = { case a :: b :: c :: _ => (a, b, c) }
+    evalN(List(expr1, expr2, expr3), s)(f.tupled.compose(fff))
+  }
+
+  def evalN(expresiones: List[Expresion], s: SymbolTable)(f: List[Int] => EvalData)
+  : EvalData = {
+    import util.EitherUtils._
+    expresiones.map(ExpresionEvaluator(_, s)).sequence match {
       case Left(err) => EvalData(Left(err), s)
-      case Right((a, b, c)) => f(a, b, c)
+      case Right(values) => f(values)
     }
   }
 

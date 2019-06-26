@@ -24,6 +24,7 @@ object EvalData {
         case Some(value) => evd.copy(symbols = evd.symbols + (varName, value + inc))
       }
     }
+    def replaceVarsProcs(s: SymbolTable): EvalData = evd.copy(symbols = evd.symbols.replaceVars(s.vars).replaceProcs(s.proc))
   }
 
   implicit val evalDataMonoid: Monoid[EvalData] = new Monoid[EvalData] {
