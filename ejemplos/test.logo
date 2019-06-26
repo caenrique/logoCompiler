@@ -1,0 +1,18 @@
+to hacerEspiral :x :y :grados :incremento
+    pu
+    setxy :x :y
+    pd
+    make "iteraciones :grados / 90
+    for [:i 1 :iteraciones 1] [
+        arcr :i * :incremento 90
+    ]
+end
+
+pd
+setxy 250 250
+fd 100
+rt 90
+fd 100
+arcr 20 90
+arcl 20 90
+repeat 4 [ fd 10 rt 90 ]

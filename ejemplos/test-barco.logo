@@ -1,0 +1,64 @@
+fd 100 lt 60 bk 30 lt 60 fd 30
+
+home rt 90
+
+fd 100 rt 135
+fd 40 rt 45
+
+fd (100 - 28)*2
+
+rt 45
+fd 40
+rt 135 
+fd 100
+
+pu home setxy 0-90 95 pd
+arcl 25 360
+
+pu rt 90 bk 25
+
+fd 35 pd fd 20 pu bk 55 rt 90 fd 35 pd fd 20 pu bk 55 rt 90 fd 35 pd fd 20 pu bk 55 rt 90 fd 35 pd fd 20 pu bk 55 rt 90 
+lt 45
+fd 40 pd fd 15 pu bk 55 rt 90 fd 40 pd fd 15 pu bk 55 rt 90 fd 40 pd fd 15 pu bk 55 rt 90 fd 40 pd fd 15 pu bk 55 rt 90 
+
+pu home setxy 0-135 0-50 pd
+arcr 10 180 arcl 10 180 arcr 10 180 arcl 10 180 arcr 10 180 arcl 10 180 arcr 10 180 arcl 10 180 arcr 10 180 arcl 10 180 arcr 10 180 arcl 10 180 arcr 10 180 arcl 10 180 
+
+pu home setxy 0-135 0-60 pd
+arcr 10 180 arcl 10 180 arcr 10 180 arcl 10 180 arcr 10 180 arcl 10 180 arcr 10 180 arcl 10 180 arcr 10 180 arcl 10 180 arcr 10 180 arcl 10 180 arcr 10 180 arcl 10 180 
+
+pu home setxy 0-135 0-70 pd
+arcr 10 180 arcl 10 180 arcr 10 180 arcl 10 180 arcr 10 180 arcl 10 180 arcr 10 180 arcl 10 180 arcr 10 180 arcl 10 180 arcr 10 180 arcl 10 180 arcr 10 180 arcl 10 180 
+
+pu home setxy 5 5 pd
+
+fd 62 rt 125 fd 110 lt 35 bk 90 
+
+pu bk 10 lt 90 pd fd 85 lt 135 fd 120 rt 45 bk 83
+
+pu home setxy (random 300) -150  0-90 pd fd 0
+pu home setxy (random 300) -150  0-90 pd fd 0
+pu home setxy (random 300) -150  0-90 pd fd 0
+pu home setxy (random 300) -150  0-90 pd fd 0
+pu home setxy (random 300) -150  0-90 pd fd 0
+pu home setxy (random 300) -150  0-90 pd fd 0
+pu home setxy (random 300) -150  0-90 pd fd 0
+pu home setxy (random 300) -150  0-90 pd fd 0
+
+pu home setxy (random 300) -150  0-95 pd fd 0
+pu home setxy (random 300) -150  0-95 pd fd 0
+pu home setxy (random 300) -150  0-95 pd fd 0
+pu home setxy (random 300) -150  0-95 pd fd 0
+pu home setxy (random 300) -150  0-95 pd fd 0
+pu home setxy (random 300) -150  0-95 pd fd 0
+pu home setxy (random 300) -150  0-95 pd fd 0
+pu home setxy (random 300) -150  0-95 pd fd 0
+
+pu home setxy (random 300) -150  0-102 pd fd 0
+pu home setxy (random 300) -150  0-102 pd fd 0
+pu home setxy (random 300) -150  0-102 pd fd 0
+pu home setxy (random 300) -150  0-102 pd fd 0
+pu home setxy (random 300) -150  0-102 pd fd 0
+pu home setxy (random 300) -150  0-102 pd fd 0
+pu home setxy (random 300) -150  0-102 pd fd 0
+

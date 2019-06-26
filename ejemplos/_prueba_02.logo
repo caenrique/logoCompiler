@@ -1,0 +1,55 @@
+rt 50
+
+fd 100
+arcr 25 90
+
+fd 100
+arcr 25 90
+fd 100
+arcr 25 90
+fd 100
+arcr 25 90
+
+pu home pd
+
+;arcl 200 180
+arcl 100 180
+arcl 50 180
+arcl 25 180
+arcl 12 180
+
+pu home pd
+rt 10 
+
+arcl 100 180
+arcl 50 180
+arcl 25 180
+arcl 12 180
+
+cs
+
+rt 15
+pu
+rt 90
+bk 150
+lt 90
+pd
+
+arcr 75 180
+arcl 50 180
+arcr 25 180
+arcl 12 180
+
+fd 110
+
+arcl 12 90
+
+fd (75+50+25+12 )*2
+
+arcl 12 90
+
+fd 100 + 12
+
+lt 90
+
+fd 12*2

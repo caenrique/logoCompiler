@@ -1,0 +1,93 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ 
+
+;; COMO PINTAR BARCO
+make "zoom 1
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; OLITAS
+
+for [v 1 3 1] [
+	pu home 
+	setxy ((0-135)*:zoom) (((0-50) - (:v*20))*:zoom) 
+	pd
+	for [w 1 6 1] [
+		arcr 10*:zoom 180 arcl 10*:zoom 180
+	]
+]
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; ARENA
+ 
+make "nivel 0-200 * :zoom
+make "aancho 500
+for [j 1 300 1] [
+	pu home 
+	setxy 
+		((random :aancho) -:aancho/2)*:zoom  
+		(:nivel - random 60) 
+	pd 
+	fd 0
+]
+
+
+;; MASTIL
+
+make "mastil 100 * :zoom
+pu home pd
+fd :mastil lt 60 bk 30*:zoom lt 60 fd 30*:zoom
+
+home rt 90
+
+make "angatake 135
+make "anchobarco 100 * :zoom
+make "prof   40 * :zoom
+
+fd :anchobarco rt :angatake
+fd :prof       rt 180 - :angatake
+
+
+make "base (:anchobarco + (:prof * (cos :angatake))/100)*2 
+fd :base
+
+rt 180 - :angatake
+fd :prof rt :angatake
+fd :anchobarco
+
+
+
+
+;;; SOL
+pu home setxy 0-90*:zoom 125*:zoom pd
+make "radiosol 25*:zoom
+arcl :radiosol 360
+
+;al centro
+pu rt 90 bk 25*:zoom
+
+; rayos
+make "inicio1 35   make "inicio2 40   make "l1 50    make "l2 15
+repeat 4 [  fd :inicio1*:zoom pd fd :l1*:zoom pu bk (:inicio1 + :l1)*:zoom rt 90  ]
+lt 45
+repeat 4 [  fd :inicio2*:zoom pd fd :l2*:zoom pu bk (:inicio2 + :l2)*:zoom rt 90  ]
+
+
+
+
+;;;; VELAS
+pu home setxy 5 5 pd
+
+;; Vela chica
+fd 62 rt 125 fd 110 lt 35 bk 90 
+
+;; Vela grande
+pu bk 10 lt 90 pd fd 85 lt 135 fd 120 rt 45 bk 83
+
+
+

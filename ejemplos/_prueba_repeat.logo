@@ -1,0 +1,40 @@
+; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;   EJEMPLO DE REPEAT
+; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+rt 015
+pu setxy 0-150 0 pd
+
+make "acum 0
+make "offset 25
+
+
+make "r 100
+make "lado 0
+
+repeat 2 [
+	arcr :r 180
+	make "acum :acum + :r
+	make "r :r/2
+	make "lado mod (:lado + 1) 2
+
+	arcl :r 180
+	make "acum :acum + :r
+	make "r :r/2
+	make "lado mod (:lado + 1) 2
+]
+
+make "alto 110
+make "radio 20
+
+fd :alto
+arcl :radio 90
+
+fd (:acum)*2 + :offset
+arcl :radio 90
+
+fd :alto 
+lt 90
+fd :radio*2 + :offset
+
+
