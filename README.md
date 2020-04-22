@@ -1,12 +1,3 @@
----
-title: Compilador de LOGO a HTML5
-author: César Enrique Ramírez
-date: Junio 2019
-documentclass: article
-papersize: a4
-abstract: "Implementacion de un compilador del lenguaje logo para representarlo en un navegador usando un canvas. La implementacion está realizada con el lenguaje de programacion Scala"
----
-
 # Introducción
 
 El objetivo del trabajo es analizar un código escrito en lenguaje LOGO y transformarlo en código HTML5 utilizando un canvas y JavaScript. Se nos entrega una descripción del lenguaje en forma de gramática EBNF, que tras un primer análisis vemos que no es LL(1).
